@@ -88,14 +88,13 @@ function App() {
     d = d.addMinutes(timeStep)
   }
   return (
-    <div style={{
-      display: 'grid',
+    <div className="grid" style={{
       gridTemplateColumns: '[front] 50px '+ days.map(d => `[${d}] 100px`).join(" "),
       gridTemplateRows: '[head] 30px ' + slots.map(s => `[t${s.cleanString()}] 60px`).join(' '),
     }}>
       {tt.map(t => <div key={t.day+t.start.cleanString()+t.end.cleanString()} style={{gridColumn: `[${t.day}] / span 1`, gridRow: `t${t.start.cleanString()} / t${t.end.cleanString()}`}} className="border text-center"><div style={{position: 'sticky', top: 30}}><div>{t.subject}</div><div>{t.teacher}</div></div></div>)}
-      {days.map(s => <div key={s} style={{gridColumn: `${s} / span 1`, gridRow: `head / span 1`, position: 'sticky', top: 0, backgroundColor: 'white'}} className="border text-center">{s.toUpperCase()}</div>)}
-      {slots.map(s => <div key={s.cleanString()} style={{gridColumn: 'front / span 1', gridRow: `t${s.cleanString()} / span 1`, position: 'sticky', left: 0, backgroundColor: 'white', transform: "translateY(-13px)", borderRight: "solid 1px"}}>{s.string()}</div>)}
+      {days.map(s => <div key={s} style={{gridColumn: `${s} / span 1`, gridRow: `head / span 1`}} className="sticky top-0 bg-white border text-center">{s.toUpperCase()}</div>)}
+      {slots.map(s => <div key={s.cleanString()} style={{gridColumn: 'front / span 1', gridRow: `t${s.cleanString()} / span 1`}} className={"sticky left-0 bg-white transform -translate-y-3" + (s.string() === dayEnd.string() ? "" : " border-r")}>{s.string()}</div>)}
     </div>
   );
 }
