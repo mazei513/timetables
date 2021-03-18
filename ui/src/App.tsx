@@ -34,7 +34,7 @@ class TimeOfDay {
   }
 }
 
-type Slot = {
+type Class = {
   day: DayOfWeek
   start: TimeOfDay
   end: TimeOfDay
@@ -42,7 +42,7 @@ type Slot = {
   teacher?: string
 }
 
-const tt: Array<Slot> = [
+const tt: Array<Class> = [
   { day: 'monday', start: new TimeOfDay(8), end: new TimeOfDay(9), subject: "Math", teacher: "Alan" },
   { day: 'monday', start: new TimeOfDay(9), end: new TimeOfDay(11), subject: "English", teacher: "Sarah" },
   { day: 'monday', start: new TimeOfDay(11), end: new TimeOfDay(12), subject: "Science", teacher: "Carly" },
@@ -76,27 +76,81 @@ const tt: Array<Slot> = [
 ]
 
 function App() {
-  const dayStart = new TimeOfDay(8)
-  const dayEnd = new TimeOfDay(15, 30)
-  const timeStep = 30
-
   const days: Array<DayOfWeek> = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
+  return (
+    <div className="grid h-screen w-screen">
+      <div>Header</div>
+      <div className="overflow-auto h-full w-full">
+        <Timetable classes={tt} days={days} timeEnd={new TimeOfDay(15, 30)} timeStart={new TimeOfDay(8)} timeStep={30} />
+      </div>
+    </div>
+  );
+}
+
+type TimetableProps = {
+  classes: Array<Class>,
+  days: Array<DayOfWeek>,
+  timeStart: TimeOfDay,
+  timeEnd: TimeOfDay,
+  timeStep: number,
+}
+
+function Timetable(props: TimetableProps) {
   const slots: Array<TimeOfDay> = []
-  let d = dayStart
-  while (d.string() <= dayEnd.string()) {
+  let d = props.timeStart
+  while (d.string() <= props.timeEnd.string()) {
     slots.push(d)
-    d = d.addMinutes(timeStep)
+    d = d.addMinutes(props.timeStep)
   }
   return (
     <div className="grid" style={{
-      gridTemplateColumns: '[front] 50px '+ days.map(d => `[${d}] 100px`).join(" "),
+      gridTemplateColumns: '[front] 50px ' + props.days.map(d => `[${d}] 100px`).join(" "),
       gridTemplateRows: '[head] 30px ' + slots.map(s => `[t${s.cleanString()}] 60px`).join(' '),
     }}>
-      {tt.map(t => <div key={t.day+t.start.cleanString()+t.end.cleanString()} style={{gridColumn: `[${t.day}] / span 1`, gridRow: `t${t.start.cleanString()} / t${t.end.cleanString()}`}} className="border text-center"><div style={{position: 'sticky', top: 30}}><div>{t.subject}</div><div>{t.teacher}</div></div></div>)}
-      {days.map(s => <div key={s} style={{gridColumn: `${s} / span 1`, gridRow: `head / span 1`}} className="sticky top-0 bg-white border text-center">{s.toUpperCase()}</div>)}
-      {slots.map(s => <div key={s.cleanString()} style={{gridColumn: 'front / span 1', gridRow: `t${s.cleanString()} / span 1`}} className={"sticky left-0 bg-white transform -translate-y-3" + (s.string() === dayEnd.string() ? "" : " border-r")}>{s.string()}</div>)}
+      {props.classes.map(t => <TimetableClass classProp={t} />)}
+      {props.days.map(s => <TimetableHeader dayOfWeek={s} />)}
+      {slots.map(s => <TimetableTimeHeader slot={s} showBorder={s.string() === props.timeEnd.string()} />)}
     </div>
-  );
+  )
+}
+
+type TimetableHeaderProps = {
+  dayOfWeek: DayOfWeek
+}
+
+function TimetableHeader({ dayOfWeek }: TimetableHeaderProps) {
+  return (
+    <div key={dayOfWeek} style={{ gridColumn: `${dayOfWeek} / span 1`, gridRow: `head / span 1` }} className="sticky top-0 bg-white border text-center">
+      {dayOfWeek.toUpperCase()}
+    </div>
+  )
+}
+
+type TimetableClassProps = {
+  classProp: Class
+}
+function TimetableClass({ classProp }: TimetableClassProps) {
+  const key = classProp.day + classProp.start.cleanString() + classProp.end.cleanString();
+  return (
+    <div key={key} style={{ gridColumn: `[${classProp.day}] / span 1`, gridRow: `t${classProp.start.cleanString()} / t${classProp.end.cleanString()}` }} className="border text-center">
+      <div className="sticky top-8">
+        <div>{classProp.subject}</div>
+        <div>{classProp.teacher}</div>
+      </div>
+    </div>
+  )
+}
+
+type TimetableTimeHeaderProps = {
+  slot: TimeOfDay
+  showBorder: boolean
+}
+function TimetableTimeHeader({ slot, showBorder }: TimetableTimeHeaderProps) {
+  return (
+    <div key={slot.cleanString()} style={{ gridColumn: 'front / span 1', gridRow: `t${slot.cleanString()} / span 1` }} className={"sticky left-0 bg-white transform -translate-y-3" + (showBorder ? "" : " border-r")}>
+      {slot.string()}
+    </div>
+  )
 }
 
 export default App;
