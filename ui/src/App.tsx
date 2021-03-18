@@ -78,10 +78,13 @@ const tt: Array<Class> = [
 function App() {
   const days: Array<DayOfWeek> = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
   return (
-    <div className="grid h-screen w-screen">
-      <div>Header</div>
-      <div className="overflow-auto h-full w-full">
-        <Timetable classes={tt} days={days} timeEnd={new TimeOfDay(15, 30)} timeStart={new TimeOfDay(8)} timeStep={30} />
+    <div className="flex flex-col h-screen w-screen">
+      <div className="h-16 bg-blue-200">Header</div>
+        <div className="overflow-auto">
+          <Timetable classes={tt} days={days} timeEnd={new TimeOfDay(15, 30)} timeStart={new TimeOfDay(8)} timeStep={30} />
+        </div>
+      <div className="h-1/3 w-full bg-blue-200">
+        Actions
       </div>
     </div>
   );
@@ -107,9 +110,9 @@ function Timetable(props: TimetableProps) {
       gridTemplateColumns: '[front] 50px ' + props.days.map(d => `[${d}] 100px`).join(" "),
       gridTemplateRows: '[head] 30px ' + slots.map(s => `[t${s.cleanString()}] 60px`).join(' '),
     }}>
-      {props.classes.map(t => <TimetableClass classProp={t} />)}
-      {props.days.map(s => <TimetableHeader dayOfWeek={s} />)}
-      {slots.map(s => <TimetableTimeHeader slot={s} showBorder={s.string() === props.timeEnd.string()} />)}
+      {props.classes.map(t => <TimetableClass key={t.day + t.start.cleanString() + t.end.cleanString()} classProp={t} />)}
+      {props.days.map(s => <TimetableHeader key={s} dayOfWeek={s} />)}
+      {slots.map(s => <TimetableTimeHeader key={s.cleanString()} slot={s} showBorder={s.string() === props.timeEnd.string()} />)}
     </div>
   )
 }
@@ -120,7 +123,7 @@ type TimetableHeaderProps = {
 
 function TimetableHeader({ dayOfWeek }: TimetableHeaderProps) {
   return (
-    <div key={dayOfWeek} style={{ gridColumn: `${dayOfWeek} / span 1`, gridRow: `head / span 1` }} className="sticky top-0 bg-white border text-center">
+    <div style={{ gridArea: `head / ${dayOfWeek} / span 1 / span 1` }} className="sticky top-0 bg-white border text-center">
       {dayOfWeek.toUpperCase()}
     </div>
   )
@@ -130,9 +133,8 @@ type TimetableClassProps = {
   classProp: Class
 }
 function TimetableClass({ classProp }: TimetableClassProps) {
-  const key = classProp.day + classProp.start.cleanString() + classProp.end.cleanString();
   return (
-    <div key={key} style={{ gridColumn: `[${classProp.day}] / span 1`, gridRow: `t${classProp.start.cleanString()} / t${classProp.end.cleanString()}` }} className="border text-center">
+    <div style={{ gridArea: `t${classProp.start.cleanString()} / ${classProp.day} / t${classProp.end.cleanString()} / span 1` }} className="border-collapse border text-center">
       <div className="sticky top-8">
         <div>{classProp.subject}</div>
         <div>{classProp.teacher}</div>
@@ -147,7 +149,7 @@ type TimetableTimeHeaderProps = {
 }
 function TimetableTimeHeader({ slot, showBorder }: TimetableTimeHeaderProps) {
   return (
-    <div key={slot.cleanString()} style={{ gridColumn: 'front / span 1', gridRow: `t${slot.cleanString()} / span 1` }} className={"sticky left-0 bg-white transform -translate-y-3" + (showBorder ? "" : " border-r")}>
+    <div style={{ gridArea: `t${slot.cleanString()} / front / span 1 / span 1` }} className={"sticky left-0 bg-white transform -translate-y-3" + (showBorder ? "" : " border-r")}>
       {slot.string()}
     </div>
   )
